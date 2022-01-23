@@ -45,6 +45,7 @@ fid.write('--------------------------------------------- \n ')
 fid.write('Realization   Mean   Variance  Std Dev    CV\n')
 #
 HF = plt.figure(1)
+HF.tight_layout()
 # plt.show()
 # HF=figure;  # open figure HF for histograms
 #
@@ -53,6 +54,10 @@ vari = np.zeros(4)
 stddev = np.zeros(4)
 CV = np.zeros(4)
 density = np.zeros((4, 50))
+
+# generate the random lattice here.  this could be used in replacement of line 62.
+rlattice = np.random.randint(2, size=(4,50))
+
 for j in range(4):  # 4 realizations
     lattice[j, :] = np.round((np.random.random(n))) # generate four 0,1 processes
                                      # revise this line to change probs
@@ -60,11 +65,14 @@ for j in range(4):  # 4 realizations
 
     # HF.subplot(2,2,j) # histogram for one of 4 realizations
     plt.subplot(2, 2, j+1)
-    plt.hist((lattice[j,:])) # plot histogram for real j
+    # plt.hist((lattice[j,:]), align='right') # plot histogram for real j
+    labels, counts = np.unique(lattice[j, :], return_counts=True)
+    plt.bar(labels, counts, align='center')
     plt.xlabel('value')
     plt.ylabel('number')
-    plt.xlim(0, 1)
+    plt.xlim(-1, 2)
     plt.ylim(0, n)
+    plt.gca().set_xticks([0, 1])
 
     # h = findobj(gca,'Type','patch');
     # set(h,'FaceColor','r','EdgeColor','w'); #surround bar with white
@@ -86,8 +94,10 @@ plt.show()
 # plot the density as function of averaging interval (one plot for all)
 
 DFa= plt.figure(3) # open new figure DF for density plot
+DFa.tight_layout()
+plotstyle = dict(markersize=2, linewidth=0.75)
 for j in range(4):
-    plt.plot(density[j],'-o', label='{}'.format(j+1))
+    plt.plot(density[j],'-o', label='{}'.format(j+1), **plotstyle)
     plt.ylim(0, 1)
     plt.xlabel('averaging interval')
     plt.ylabel('density')
@@ -101,17 +111,19 @@ plt.show()
 #
 # plot the density as function of averaging interval (separate plots)
 DFb= plt.figure(4) # open new figure RP for plots of realizations
+DFb.tight_layout()
 for j in range(4):  # plot the 4 density funcitons
     plt.subplot(2,2,j+1) # density for each of 4 realizations
-    plt.plot(density[j,:],'-o') # plot
+    plt.plot(density[j, :], '-o', **plotstyle) # plot
     plt.xlabel('averaging interval')
     plt.ylabel('density')
     plt.xlim(0, n)
     plt.ylim(0, 1)
-    plt.plot(location,target,'--')
+    plt.plot(location, target, '--')
 plt.show()
 # plot the realizations
 RP = plt.figure(5)  # open new figure RP for plots of realizations
+RP.tight_layout()
 for j in range(4):  # plot the 4 realizations
     plt.subplot(3, 2, j+1) # histogram for each of 4 realizations
     plt.bar(location, lattice[j, :]) # plot the 0,1 realization
