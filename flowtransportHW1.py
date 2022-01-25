@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 # np.random.seed(123456789)
 
-n = 5000 # number of lattice points
+n = 8000 # number of lattice points
 # assumes that probability of 0 or 1 at each point is 0.50
 #
 x = 100
@@ -59,16 +59,21 @@ density = np.zeros((x, n))
 dens_avg = np.zeros(n)
 dens_vari = np.zeros(n)
 dens_stddev = np.zeros(n)
+d_dens_dm = np.zeros((x, n))
+ddens_dm_avg = np.zeros(n)
 
 # generate the random lattice here.  this could be used in replacement of line 62.
 lattice = np.random.randint(2, size=(x, n))
+## for problemo 1.3
+# nums = np.random.choice([0, 1], size=1000, p=[.3, .7])
 print('rows = ', len(lattice), 'cols = ', len(lattice[0]))
 
 for j in range(x):
     density[j, :] = np.cumsum(lattice[j, :]) / location  # calc. density function
+    # d_dens_dm[j, :] = np.cumsum(lattice[j, :])*-1 / location**2
     # print('density for realization {} = {}'.format(j, density))
 for k in range(n):  # n lattice points, storing stats at each position
-    print(k)
+    # print(k)
     # lattice[j, :] = np.round((np.random.random(n))) # generate four 0,1 processes
                                      # revise this line to change probs
     # print('lattice {}:'.format(j), lattice[j,:])
@@ -102,9 +107,31 @@ for k in range(n):  # n lattice points, storing stats at each position
     vari[k] = np.var(lattice[:, k]) # calc. variance
     stddev[k] = np.sqrt(vari[k]) # calc. standard deviation
     # # CV[k] = stddev[k]/avg[k] # calc. coef. of variation
-    dens_avg[k] = np.mean(density[:, k])
+
     dens_vari[k] = np.var(density[:, k])
     dens_stddev[k] = np.sqrt(dens_vari[k])
+    # ddens_dm_avg[k] = np.mean(d_dens_dm[:, k])
+
+    dens_avg[k] = np.mean(density[:, k])
+sumofcumdiff = np.zeros(n)
+diff = np.zeros(n)
+for m in range(n):
+    # print(m)
+    if m == n-1:
+        break
+    else:
+        diff[m] = dens_avg[m+1] - dens_avg[m]
+        # sumofcumdiff[m] = np.cumsum(np.abs(diff))
+        # print(sumofcumdiff)
+
+plt.figure(7)
+plt.plot(sumofcumdiff)
+
+print(min(dens_stddev))
+
+plt.figure(8)
+plt.plot(0.5-dens_avg)
+
 
 
 
@@ -137,7 +164,7 @@ plt.ylabel('standard deviation')
 plt.title('ensemble standard deviation of processes')
 
 plt.figure(3)
-plt.plot(dens_avg, '-o', **plotstyle)
+plt.plot(dens_avg, '-', **plotstyle)
 plt.xlabel('averaging distance (length)')
 plt.ylabel('mean')
 plt.title('ensemble mean of densities')
@@ -150,7 +177,16 @@ plt.xlabel('averaging distance (length)')
 plt.ylabel('standard deviation')
 plt.title('ensemble standard deviation of densities')
 
+plt.figure(5)
+plt.plot(ddens_dm_avg, '-o', **plotstyle)
+plt.xlabel('averaging distance (length)')
+plt.ylabel('mean of d(n/m)/dm')
+plt.title('ensemble mean of d(n/m)/dm')
+
 plt.show()
+
+## REL should be when the density stabilizes around the mean, so deviation from 0.5 should be small for a number of points
+
 
 # plot the density as function of averaging interval (one plot for all)
 
