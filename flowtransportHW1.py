@@ -115,22 +115,51 @@ for k in range(n):  # n lattice points, storing stats at each position
     dens_avg[k] = np.mean(density[:, k])
 sumofcumdiff = np.zeros(n)
 diff = np.zeros(n)
+diff_stddev = np.zeros(n)
 for m in range(n):
     # print(m)
     if m == n-1:
         break
     else:
         diff[m] = dens_avg[m+1] - dens_avg[m]
+        diff_stddev[m] = np.abs(dens_stddev[m+1] - dens_stddev[m])
         # sumofcumdiff[m] = np.cumsum(np.abs(diff))
         # print(sumofcumdiff)
 
-plt.figure(7)
-plt.plot(sumofcumdiff)
+range_obs = np.max(dens_avg) - np.min(dens_avg)
+print('range = ', range_obs)
+RELcutoff = 0.025*np.mean(dens_avg)
+# RELcutoff = 0.3*range_obs
+count = 0
+for i, di in enumerate(dens_stddev):
+    if di <= RELcutoff:
+        count += 1
+        if count > .01*n:
+            print('length point = ', i, 'and', 'standard deviation = ', di, 'SANITY CHECK!!! REL CUTOFF = ', RELcutoff)
+            break
+    else:
+        count = 0
 
-print(min(dens_stddev))
+grad = diff_stddev
+plt.figure(6)
+plt.plot(grad)
+for i, di in enumerate(grad):
+    if di <= RELcutoff:
+        print('GRADIENT length point = ', i, 'and', 'standard deviation = ', di, 'SANITY CHECK!!! REL CUTOFF = ', RELcutoff)
+        break
 
-plt.figure(8)
-plt.plot(0.5-dens_avg)
+
+# w = 0.01*n
+# dens_err = 0.5-dens_avg
+# movav = np.convolve(dens_err, np.ones(int(w)), 'valid') / w
+
+# print('movav = ', movav)
+# plt.figure(9)
+# plt.plot(movav)
+
+
+# plt.figure(8)
+# plt.plot(0.5-dens_avg)
 
 
 
@@ -177,11 +206,11 @@ plt.xlabel('averaging distance (length)')
 plt.ylabel('standard deviation')
 plt.title('ensemble standard deviation of densities')
 
-plt.figure(5)
-plt.plot(ddens_dm_avg, '-o', **plotstyle)
-plt.xlabel('averaging distance (length)')
-plt.ylabel('mean of d(n/m)/dm')
-plt.title('ensemble mean of d(n/m)/dm')
+# plt.figure(5)
+# plt.plot(ddens_dm_avg, '-o', **plotstyle)
+# plt.xlabel('averaging distance (length)')
+# plt.ylabel('mean of d(n/m)/dm')
+# plt.title('ensemble mean of d(n/m)/dm')
 
 plt.show()
 

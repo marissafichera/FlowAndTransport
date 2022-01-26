@@ -32,13 +32,13 @@ import sys
 
 # np.random.seed(123456789)
 
-n = 5000 # number of lattice points
+n = 200 # number of lattice points
 x = 100 # number of realizations
 # assumes that probability of 0 or 1 at each point is 0.50
 #
 location = np.arange(1, n+1) # location index
 # print(location)
-lattice = np.zeros((x, n)) # initialize array for x realizations
+# lattice = np.zeros((x, n)) # initialize array for x realizations
 # print('lattice = ', lattice)
 #
 fid = open('Statistics_Table', 'w') # create output file
@@ -64,12 +64,33 @@ lattice = np.random.randint(2, size=(x, n))
 avg_process = np.zeros((x, n))
 vari_process = np.zeros((x, n))
 density_process = np.zeros((x, n))
+cs = np.zeros((x, n))
 # print('size avg process1 = {}'.format(avg_process.size))
-for j in range(x):  # x realizations
+for j in range(1, x+1):  # x realizations
     # lattice = np.random.randint(2, size=(x, n))
-    for k in range(n):
+    for k in range(1, n+1):
         avg_process[j, k] = np.mean(lattice[j, 0:k])
         vari_process[j, k] = np.var(lattice[j, 0:k])
+    # process = plt.figure(1)
+    # plt.subplot(2, 2, j+1)
+    # plt.plot(avg_process[j, :], 'o-')
+    # plt.show()
+# sys.exit('a;slkdfasd')
+#         cs[j, k] = np.cumsum(lattice[j, 0:k])
+    density_process[j, :] = np.cumsum(lattice[j, :]) / location
+    # print(density_process)
+    plt.plot(density_process, '-o')
+plt.show()
+    # print('density = {}'.format(density_process[j, :]))
+    # sys.exit('as;ldkfja;sldkjf')
+    # dens_avg = np.zeros((x, n))
+    # dens_vari = np.zeros((x, n))
+    # for d in range(n):
+    #     for e in range(x):
+    #         dens_avg[d, e] = np.mean(density_process[d, 0:e])
+    #         dens_vari[d, e] = np.var(density_process[d, 0:e])
+
+
         # print(location[k])
         # print('lattice = ', lattice[j, 0:k])
         # print('cumsum = ', np.cumsum(lattice[j, 0:k]))
@@ -84,7 +105,7 @@ for j in range(x):  # x realizations
     # plt.plot(avg_process[j], 'o')
     # plt.show()
     # sys.exit('check avg values')
-    density_process[j, :] = np.cumsum(lattice[j, :]) / location
+    # density_process[j, :] = np.cumsum(lattice[j, :]) / location
     # plt.plot(density_process[j, :])
     # plt.show()
 
