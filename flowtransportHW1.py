@@ -63,9 +63,9 @@ d_dens_dm = np.zeros((x, n))
 ddens_dm_avg = np.zeros(n)
 
 # generate the random lattice here.  this could be used in replacement of line 62.
-lattice = np.random.randint(2, size=(x, n))
+# lattice = np.random.randint(2, size=(x, n))
 ## for problemo 1.3
-# nums = np.random.choice([0, 1], size=1000, p=[.3, .7])
+lattice = np.random.choice([0, 1], size=(x, n), p=[.7, .3])
 print('rows = ', len(lattice), 'cols = ', len(lattice[0]))
 
 for j in range(x):

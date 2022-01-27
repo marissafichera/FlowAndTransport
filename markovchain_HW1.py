@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-# markovchain.m
+# markovchain.m marfichrope
 #
 # a script file that
 # simulates a 2 member Markov chain
