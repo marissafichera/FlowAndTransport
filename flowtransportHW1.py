@@ -56,7 +56,7 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
     avg = np.zeros(n)
     vari = np.zeros(n)
     stddev = np.zeros(n)
-    CV = np.zeros(x)
+    CV = np.zeros(n)
     density = np.zeros((x, n))
     dens_avg = np.zeros(n)
     dens_vari = np.zeros(n)
@@ -81,16 +81,16 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
         avg[k] = np.mean(lattice[:, k])
         vari[k] = np.var(lattice[:, k]) # calc. variance
         stddev[k] = np.sqrt(vari[k]) # calc. standard deviation
-        # # CV[k] = stddev[k]/avg[k] # calc. coef. of variation
+        # CV[k] = stddev[k]/avg[k] # calc. coef. of variation
 
         dens_vari[k] = np.var(density[:, k])
         dens_stddev[k] = np.sqrt(dens_vari[k])
-        # ddens_dm_avg[k] = np.mean(d_dens_dm[:, k])
-
         dens_avg[k] = np.mean(density[:, k])
+
     sumofcumdiff = np.zeros(n)
     diff = np.zeros(n)
     diff_stddev = np.zeros(n)
+
     for m in range(n):
         # print(m)
         if m == n-1:
@@ -110,7 +110,7 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
         if di <= RELcutoff:
             count += 1
             if count > .01*n:
-                print('length point = ', i, 'and', 'standard deviation = ', di, 'SANITY CHECK!!! REL CUTOFF = ', RELcutoff)
+                print('length point = ', i, 'and', 'standard deviation = ', di, 'REL CUTOFF = ', RELcutoff)
                 break
         else:
             count = 0
@@ -123,8 +123,18 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
             print('GRADIENT length point = ', i, 'and', 'standard deviation = ', di, 'SANITY CHECK!!! REL CUTOFF = ', RELcutoff)
             break
 
-
     fid.close()
+
+    mean_of_mean_p = np.mean(avg)
+    mean_of_stddev_p = np.mean(stddev)
+    mean_mean_dens = np.mean(dens_avg)
+    mean_stddev_dens = np.mean(dens_stddev)
+
+    print('MEAN MEAN PROCESS = ', mean_of_mean_p)
+    print('MEAN STD DEV PROCESS = ', mean_of_stddev_p)
+    print('MEAN MEAN DENSITIES = ', mean_mean_dens)
+    print('MEAN STDDEV DENSITIES = ', mean_stddev_dens)
+
     # plt.show()
     # sys.exit('check stats')
     plotstyle = dict(markersize=2, linewidth=0.75)
@@ -156,9 +166,15 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
     plt.ylabel('standard deviation')
     plt.title('ensemble standard deviation of densities')
 
-    plt.show()
+    plt.figure(5)
+    plt.plot(CV, '.', **plotstyle)
 
-def markov_chain():
+    # plt.show()
+
+    return avg
+
+def markov_chain(no_p, p_matrix):
+    # no_p = 200
     # markovchain.m marfichrope
     #
     # a script file that
@@ -176,13 +192,14 @@ def markov_chain():
     #
     # Initiate
     #
-    P = [(.7, .3),
-         (.2, .8)]
+    # P = [(.7, .3),
+    #      (.2, .8)]
+    P = p_matrix
     # P=[[.7 .3], [.2 .8]]  # transition matrix
     p1 = P[0][0]
     p2 = P[0][1]
     # p1=P(1,1) p2=P(1,2) # probabilities for first lattice location
-    no_p = 8000  # number of lattice (time or space) points
+    # no_p = 8000  # number of lattice (time or space) points
     location = np.arange(1, no_p + 1)  # location of lattice points
     # lattice = np.ones(1, np) # initial values at lattice points set to 1
     lattice = np.ones(no_p).astype(int)
@@ -263,26 +280,31 @@ def markov_chain():
             p21 = p21 + 1
     else:
         print('marissa added this in')
-    print('p11 = ', p11)
-    print('p22 = ', p22)
-    print('p12 = ', p12)
-    print('p21 = ', p21)
-    #
+    # print('p11 = ', p11)
+    # print('p22 = ', p22)
+    # print('p12 = ', p12)
+    # print('p21 = ', p21)
+    # #
     p11norm = p11 / (p11 + p12)
     p12norm = p12 / (p11 + p12)  # normalize transition counts
     p21norm = p21 / (p21 + p22)
     p22norm = p22 / (p21 + p22)  # since probs sum to one
 
+    # print('p11norm count = ', p11)
+    # print('p22norm count = ', p22)
+    # print('p12norm count = ', p12)
+    # print('p21norm count = ', p21)
+
     Pexp = ([p11norm, p12norm], [p21norm, p22norm])  # create exp. trans. matrix
 
-    print('------------------------')  # print to screen
-    print('------------------------')
-    print('Number of lattice points = ', no_p)
-    print('Experimental Transition Matrix: ')
-    print('Pexp = {}'.format(Pexp))
-    print('Target Transition Matrix:')
-    print('P = {}'.format(P))
-    print('------------------------')
+    # print('------------------------')  # print to screen
+    # print('------------------------')
+    # print('Number of lattice points = ', no_p)
+    # print('Experimental Transition Matrix: ')
+    # print('Pexp = {}'.format(Pexp))
+    # print('Target Transition Matrix:')
+    # print('P = {}'.format(P))
+    # print('------------------------')
     #
     #
     # Output
@@ -300,14 +322,57 @@ def markov_chain():
 
     return np.array(lattice), no_p
 
+
+def calculate_stats(f, g):
+    f = np.array(f)
+    g = np.array(g)
+    fbar = np.mean(f)
+    gbar = np.mean(g)
+
+    f_vari = np.var(f)
+    g_vari = np.var(g)
+
+    print('f mean = ', fbar)
+    print('f variance = ', f_vari)
+    print('g mean = ', gbar)
+    print('g variance = ', g_vari)
+
+    for s in np.arange(f):
+        cv[s] = f[s] * f[s+1]
+
+
+
+    ck = np.cov(f, g)
+
+    print(ck)
+
+
 def main():
-    markov_lattices = np.zeros((100, 8000))
-    for i in range(10):
-        markov_lattice, no_p = markov_chain()
+    numpts = 8000
+    markov_lattices = np.zeros((100, numpts))
+    P = [(.7, .3),
+         (.2, .8)]
+    P2 = [(.8, .2),
+          (.3, .7)]
+
+    for i in range(100):
+        markov_lattice, no_p = markov_chain(numpts, P)
         markov_lattices[i] = markov_lattice
         # print(markov_lattice, no_p)
     print('shape of multi markov lattice = ', markov_lattices.shape)
-    monte_carlo_sim(markov_lattices, no_p)
+    f = monte_carlo_sim(markov_lattices, numpts)
+
+    for i in range(100):
+        markov_lattice, no_p = markov_chain(numpts, P2)
+        markov_lattices[i] = markov_lattice
+        # print(markov_lattice, no_p)
+    print('shape of multi markov lattice = ', markov_lattices.shape)
+    g = monte_carlo_sim(markov_lattices, numpts)
+    # monte_carlo_sim('null', 800)
+    # print(np.array(f))
+    # print(np.array(g))
+
+    calculate_stats(f, g)
 
 
 if __name__ == '__main__':
