@@ -29,6 +29,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import statsmodels.api as sm
 
 # np.random.seed(123456789)
 
@@ -48,8 +49,8 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
     fid.write('--------------------------------------------- \n ')
     fid.write('Realization   Mean   Variance  Std Dev    CV     density_mean     density_variance\n')
     #
-    HF = plt.figure(1)
-    HF.tight_layout()
+    # HF = plt.figure(1)
+    # HF.tight_layout()
     # plt.show()
     # HF=figure;  # open figure HF for histograms
     #
@@ -116,8 +117,8 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
             count = 0
 
     grad = diff_stddev
-    plt.figure(6)
-    plt.plot(grad)
+    # plt.figure(6)
+    # plt.plot(grad)
     for i, di in enumerate(grad):
         if di <= RELcutoff:
             print('GRADIENT length point = ', i, 'and', 'standard deviation = ', di, 'SANITY CHECK!!! REL CUTOFF = ', RELcutoff)
@@ -137,37 +138,39 @@ def monte_carlo_sim(markov_lattice, markov_no_p):
 
     # plt.show()
     # sys.exit('check stats')
-    plotstyle = dict(markersize=2, linewidth=0.75)
-    plt.figure(1)
-    plt.plot(avg, '-o', **plotstyle)
-    plt.xlim(0, n)
-    plt.ylim(0, 1)
-    plt.xlabel('averaging distance (length)')
-    plt.ylabel('mean')
-    plt.title('ensemble mean of processes')
 
-    plt.figure(2)
-    plt.plot(stddev, '-^', **plotstyle)
-    plt.xlim(0, n)
-    plt.ylim(0, 0.75)
-    plt.xlabel('averaging distance (length)')
-    plt.ylabel('standard deviation')
-    plt.title('ensemble standard deviation of processes')
 
-    plt.figure(3)
-    plt.plot(dens_avg, '-', **plotstyle)
-    plt.xlabel('averaging distance (length)')
-    plt.ylabel('mean')
-    plt.title('ensemble mean of densities')
-
-    plt.figure(4)
-    plt.plot(dens_stddev, '-^', **plotstyle)
-    plt.xlabel('averaging distance (length)')
-    plt.ylabel('standard deviation')
-    plt.title('ensemble standard deviation of densities')
-
-    plt.figure(5)
-    plt.plot(CV, '.', **plotstyle)
+    # plotstyle = dict(markersize=2, linewidth=0.75)
+    # plt.figure(1)
+    # plt.plot(avg, '-o', **plotstyle)
+    # plt.xlim(0, n)
+    # plt.ylim(0, 1)
+    # plt.xlabel('averaging distance (length)')
+    # plt.ylabel('mean')
+    # plt.title('ensemble mean of processes')
+    #
+    # plt.figure(2)
+    # plt.plot(stddev, '-^', **plotstyle)
+    # plt.xlim(0, n)
+    # plt.ylim(0, 0.75)
+    # plt.xlabel('averaging distance (length)')
+    # plt.ylabel('standard deviation')
+    # plt.title('ensemble standard deviation of processes')
+    #
+    # plt.figure(3)
+    # plt.plot(dens_avg, '-', **plotstyle)
+    # plt.xlabel('averaging distance (length)')
+    # plt.ylabel('mean')
+    # plt.title('ensemble mean of densities')
+    #
+    # plt.figure(4)
+    # plt.plot(dens_stddev, '-^', **plotstyle)
+    # plt.xlabel('averaging distance (length)')
+    # plt.ylabel('standard deviation')
+    # plt.title('ensemble standard deviation of densities')
+    #
+    # plt.figure(5)
+    # plt.plot(CV, '.', **plotstyle)
 
     # plt.show()
 
@@ -337,14 +340,23 @@ def calculate_stats(f, g):
     print('g mean = ', gbar)
     print('g variance = ', g_vari)
 
-    for s in np.arange(f):
-        cv[s] = f[s] * f[s+1]
+
+
+    ck_f = sm.tsa.stattools.acovf(f)
+    ck_g = sm.tsa.stattools.acovf(g)
 
 
 
-    ck = np.cov(f, g)
 
-    print(ck)
+    print(ck_f)
+    print(np.cov(f, f))
+    cc_f = np.corrcoef(f, g)
+    print('correlation coefficient of f, g = ', cc_f)
+    autocor = np.correlate(f, f)
+
+    plt.figure(10)
+    plt.plot(autocor)
+    plt.show()
 
 
 def main():
