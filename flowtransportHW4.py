@@ -18,12 +18,51 @@ def problem_4_3():
     c2 = 320
 
     u = c1*x + c2
-
+    plt.figure(1)
     plt.plot(x, u)
     plt.xlabel('x(m)')
     plt.ylabel('temperature (K)')
     plt.title('Initial and final equilibrium temperature profile')
     plt.show()
+
+    Tiold = u
+    K = 0.6     #thermal conductivity of water
+    dt = 0.001
+
+    Tinews = []
+    # for t in np.arange(0, 1000000, dt):
+    #     Tinew = Tiold + K*(u)*t
+    #     Tinews.append(Tinew)
+    # plt.figure(2)
+    # plt.plot(x, Tinews)
+    # plt.show()
+    #
+    # print('Tinew = ', Tinew)
+    p = 1000
+    m = np.zeros((p, 1000))
+    ss = []
+    # print(np.arange(1, 100000))
+    for n in np.arange(1, 1000):
+        m[n] = (1/n)*np.sin(n*np.pi*x)
+        # print('m = ', m)
+        s = np.sum(m)
+        ss.append(s)
+    print(ss)
+    T_x = T0l + (T0r - T0l)*x + (2/np.pi)*ss*(T0r-T0l)
+
+    plt.figure(2)
+    plt.plot(T_x)
+
+    # plt.figure(2)
+    # plt.plot(m)
+
+
+
+    # plt.figure(2)
+    # plt.plot(x, ms)
+
+
+
 
 def problem_4_1():
     P = np.linspace(0.1, 10, 1000)
