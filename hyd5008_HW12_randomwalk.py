@@ -14,13 +14,13 @@ def calc_speed(u, v):
     return np.sqrt(u ** 2 + v ** 2)
 
 
-def random_walk(alphaL, alphaT, diffCoef, x, y, dx, dy, speed, dt, numPoints):
-    varL = 2 * (alphaL * speed + diffCoef) * dt
-    varT = 2 * (alphaT * speed + diffCoef) * dt
+def random_walk(DL, DT, diffCoef, x, y, dx, dy, speed, t, numPoints):
+    varL = 2 * (DL / speed * np.sqrt(dx**2 + dy**2) + diffCoef) * t
+    varT = 2 * (DT / speed * np.sqrt(dx**2 + dy**2) + diffCoef) * t
 
     # create normally distributed random vector
-    zL = np.random.normal(loc=0, scale=np.sqrt(varL), size=(1, numPoints))
-    zT = np.random.normal(loc=0, scale=np.sqrt(varT), size=(1, numPoints))
+    zL = np.random.default_rng().normal(loc=0, scale=np.sqrt(varL), size=(1, numPoints))
+    zT = np.random.default_rng().normal(loc=0, scale=np.sqrt(varT), size=(1, numPoints))
 
     # Advect and then introduce random noise
     x_new = x + dx + (zL * dx / speed) + (zT * dy / speed)
@@ -39,13 +39,6 @@ def plot_variances(times, vx, vy):
     plt.xlabel('time (s)')
     plt.ylabel('variance (m^2)')
     plt.title('Variance of Particle Position')
-
-    # plot best fit line
-    axv, bxv = np.polyfit(times, vx, 1)
-    ayv, byv = np.polyfit(times, vy, 1)
-
-    plt.plot(times, axv * times + bxv, '--', color='tab:olive', label=f'slope = {np.round(axv, 4)}')
-    plt.plot(times, ayv * times + byv, '--', color='tab:cyan', label=f'slope = {np.round(bxv, 4)}')
     plt.legend()
 
 
@@ -65,7 +58,7 @@ def plot_means(times, mx, my):
     ay, by = np.polyfit(times, my, 1)
 
     plt.plot(times, ax * times + bx, '--', color='tab:orange', label=f'slope = {np.round(ax, 4)}')
-    plt.plot(times, ay * times + by, '--', color='tab:pink', label=f'slope = {np.round(bx, 4)}')
+    plt.plot(times, ay * times + by, '--', color='tab:pink', label=f'slope = {np.round(ay, 4)}')
     plt.legend()
 
 
@@ -75,7 +68,7 @@ def plot_particle_movement(numTimeSteps, x_positions, y_positions, x0, y0):
     colors = plt.cm.tab20b(np.linspace(0, 1, n_colors))
     for color, i in zip(colors, np.arange(0, numTimeSteps)):
         plt.figure(2, figsize=(11, 4.5))
-        plt.plot(x_positions[i, :], y_positions[i, :], '.', color=color)
+        plt.plot(x_positions[i, :], y_positions[i, :], '.', color=color, alpha=0.5)
     norm = mpl.colors.Normalize(vmin=0, vmax=numTimeSteps)
     s_m = plt.cm.ScalarMappable(cmap='tab20b', norm=norm)
     s_m.set_array([])
@@ -88,15 +81,16 @@ def plot_particle_movement(numTimeSteps, x_positions, y_positions, x0, y0):
 
 
 def main():
-    # set your velocity component values and dispersivity values here:
-    xvel = 1
+    # set your velocity component, dispersivity, and diffusion coefficient values here:
+    xvel = 10
     yvel = 0
-    alphaL = 1
-    alphaT = 1
+    alphaL = 0
+    alphaT = 0
+    diffCoef = 5
 
     # initialize other variables
     dt = 1  # time step in seconds
-    numTimeSteps = 200  # number of time steps
+    numTimeSteps = 500  # number of time steps
     numPoints = 1000  # number of particles
     origin = [0, 0]  # origin location of particles
     x0 = origin[0] * np.ones((1, numPoints))  # x initial location of all particles
@@ -111,12 +105,13 @@ def main():
     dx = u * dt
     dy = v * dt
 
-    # longitudinal and transverse dispersivities
+    # longitudinal and transverse dispersivities for all particles
     alphaL = alphaL * np.ones((1, numPoints))
     alphaT = alphaT * np.ones((1, numPoints))
 
-    # diffusion coefficient
-    diffCoef = 0
+    # dispersion coefficients for all particles via 13.114
+    DL = alphaL * speed
+    DT = alphaT * speed
 
     # initialize everything for the random walk
     x_positions = np.zeros((numTimeSteps, numPoints))
@@ -125,6 +120,7 @@ def main():
     variances_x = np.zeros((1, numTimeSteps))
     means_y = np.zeros((1, numTimeSteps))
     variances_y = np.zeros((1, numTimeSteps))
+
     times = np.linspace(0, numTimeSteps, numTimeSteps)
 
     x_positions[0, :] = x0
@@ -134,7 +130,7 @@ def main():
 
     # run random walk
     for t in np.arange(1, numTimeSteps):
-        x_new, y_new = random_walk(alphaL, alphaT, diffCoef, x, y, dx, dy, speed, dt, numPoints)
+        x_new, y_new = random_walk(DL, DT, diffCoef, x, y, dx, dy, speed, t, numPoints)
         x_positions[t, :] = x_new
         y_positions[t, :] = y_new
 
